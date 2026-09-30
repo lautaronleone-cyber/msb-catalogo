@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>MSB Shop · Catálogo</title>
+<link rel="icon" href="img/logo.png">
+<style>
+:root{--bg:#000;--card:#111;--card2:#1a1a1a;--line:#2a2a2a;--tx:#fff;--mut:#a8a8a8;--red:#ff1a1a;--wa:#25d366}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);-webkit-text-size-adjust:100%}
+header{padding:18px 16px 10px;text-align:center;border-bottom:2px solid var(--red)}
+header img{height:104px;width:auto;display:block;margin:0 auto}
+header p{margin:8px 0 0;color:var(--mut);font-size:.9rem}
+.bar{position:sticky;top:0;background:rgba(0,0,0,.96);padding:10px 12px 8px;z-index:5;border-bottom:1px solid var(--line)}
+.bar input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #3a3a3a;background:var(--card);color:var(--tx);font-size:1rem;outline:none}
+.bar input:focus{border-color:var(--red)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 14px;border-radius:99px;background:var(--card);border:1px solid #3a3a3a;color:var(--tx);cursor:pointer;font-size:.88rem;user-select:none}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+main{max-width:900px;margin:0 auto;padding:6px 12px 12px}
+h2{font-size:1rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin:22px 2px 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.grid{display:grid;grid-template-columns:1fr;gap:10px}
+.card{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.ph{flex:none;width:96px;height:96px;border-radius:10px;overflow:hidden;background:#fff}
+.ph img{width:100%;height:100%;object-fit:contain;display:block}
+.ph.none{background:#0b0b0b;border:1px dashed #333;display:flex;align-items:center;justify-content:center}
+.ph.none img{width:78%;height:auto;opacity:.55;object-fit:contain}
+.info{min-width:0;flex:1;display:flex;flex-direction:column}
+.nm{font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.mt{color:var(--mut);font-size:.82rem;margin-top:3px;line-height:1.3}
+.ref{color:#ff6b6b;font-style:italic}
+.btn{align-self:flex-start;margin-top:auto;background:var(--wa);color:#04210f;font-weight:800;text-decoration:none;padding:9px 16px;border-radius:10px;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+.btn:active{filter:brightness(.9)}
+.info .btn{margin-top:8px}
+.empty{text-align:center;color:var(--mut);padding:30px}
+footer{text-align:center;color:var(--mut);font-size:.8rem;padding:24px;border-top:1px solid var(--line)}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header><img src="img/logo.png" alt="MSB Shop"><p>Catálogo · Consultá por WhatsApp el producto que te guste</p></header>
+<div class="bar"><input id="q" type="search" placeholder="Buscar producto o marca…"><div class="chips" id="chips"></div></div>
+<main id="list"></main>
+<footer>Consultá precio y disponibilidad por WhatsApp. Productos sujetos a stock.</footer>
+<script>
+const SHOW_REF=true; // false => oculta la línea "DUPE DE / INSPIRADO EN" (y la excluye de la búsqueda)
+const D=__DATA__;const NUM="5491140856738";
+const cats=["Todos",...new Set(D.map(x=>x.cat))];let cur="Todos";
+const chips=document.getElementById('chips'),list=document.getElementById('list'),q=document.getElementById('q');
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function link(x){const n=[x.marca,x.prod,x.pres].filter(Boolean).join(' ');return "https://wa.me/"+NUM+"?text="+encodeURIComponent("Hola Nico! Me interesa: "+n+". ¿Tenés disponible?")}
+function thumb(x){const alt=esc([x.marca,x.prod].filter(Boolean).join(' '));
+ return x.img?`<div class="ph"><img src="img/products/${x.id}.jpg" alt="${alt}" loading="lazy" decoding="async" width="96" height="96"></div>`
+  :`<div class="ph none"><img src="img/logo.png" alt="" loading="lazy" decoding="async"></div>`}
+function render(){
+ chips.innerHTML=cats.map(c=>`<div class="chip ${c===cur?'on':''}" data-c="${esc(c)}">${esc(c)}</div>`).join('');
+ const t=q.value.toLowerCase().trim();
+ const f=D.filter(x=>(cur==="Todos"||x.cat===cur)&&(!t||(x.marca+' '+x.prod+' '+x.pres+' '+(SHOW_REF?x.ref:'')+' '+x.sec).toLowerCase().includes(t)));
+ if(!f.length){list.innerHTML='<div class="empty">No encontramos nada. Escribinos igual y te ayudamos.</div>';return}
+ let h='',last='',open=false;
+ f.forEach(x=>{const g=x.cat+(x.sec?' · '+x.sec:'');if(g!==last){if(open)h+='</div>';h+=`<h2>${esc(g)}</h2><div class="grid">`;open=true;last=g}
+  const meta=[x.pres,x.dur?('Duración '+x.dur):''].filter(Boolean).join(' · ');
+  const ref=(SHOW_REF&&x.ref)?`<div class="mt ref">${esc(x.ref)}</div>`:'';
+  h+=`<div class="card">${thumb(x)}<div class="info"><div class="nm">${esc([x.marca,x.prod].filter(Boolean).join(' '))}</div>${ref}<div class="mt">${esc(meta)}</div><a class="btn" target="_blank" rel="noopener" href="${link(x)}">Consultar</a></div></div>`});
+ if(open)h+='</div>';
+ list.innerHTML=h}
+chips.onclick=e=>{const c=e.target.dataset.c;if(c){cur=c;render()}};q.oninput=render;render();
+</script></body></html>
